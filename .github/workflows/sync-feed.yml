@@ -1,0 +1,33 @@
+name: Sync feed workers
+
+# Runs the per-app sync workers on a 15-minute cadence, independent of the
+# hosting plan. Vercel's own cron (vercel.json) fires daily on Hobby; this
+# workflow gives the sub-daily cadence without an upgrade.
+#
+# One-time setup: add the CRON_SECRET repository secret
+#   Settings → Secrets and variables → Actions → New repository secret
+# with the SAME value as the CRON_SECRET environment variable in Vercel.
+# Until it is set, the job exits cleanly without calling anything.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger connector sync
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          BASE_URL: ${{ vars.ADMIN_BASE_URL || 'https://adfmenwew.vercel.app' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET is not set — add it under Settings → Secrets and variables → Actions to enable scheduled syncs."
+            exit 0
+          fi
+          echo "Requesting $BASE_URL/api/cron/sync"
+          curl -sS -f -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/sync"
+          echo ""
+          echo "Sync request accepted."
