@@ -61,6 +61,9 @@ export async function POST(req) {
   let body = {};
   try { body = await req.json(); } catch { return NextResponse.json({ error: 'valid JSON required' }, { status: 400 }); }
   const next = normalize(String(body.tier || ''));
+  if (typeof body.tier !== 'string' || !TIERS[body.tier]) {
+    return NextResponse.json({ error: 'tier must be starter, pro, or vip' }, { status: 400 });
+  }
   await setAdminConfig('plan:tier', next);
   await audit({ action: 'plan.change', actor: session.email, target: next, result: 'success' });
   return NextResponse.json({ ok: true, active: next, current: TIERS[next] });

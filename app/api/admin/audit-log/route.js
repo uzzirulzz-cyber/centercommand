@@ -1,7 +1,7 @@
 
 // Audit log reader over the existing audit trail (lib/audit.js readAudit).
-import { readAudit } from '../../../../lib/audit';
-import { guard, json } from '../../../../lib/adminRoute';
+import { audit, readAudit } from '../../../../lib/audit';
+import { bodyOf, guard, json } from '../../../../lib/adminRoute';
 
 export async function GET(req) {
   const { session, error } = await guard(req, 'audit:view');
@@ -33,4 +33,26 @@ export async function GET(req) {
       { label: 'source', detail: 'server-side audit trail written by every admin action' },
     ],
   });
+}
+
+export async function POST(req) {
+  const { session, error } = await guard(req, 'dashboard:view', { csrf: true });
+  if (error) return error;
+
+  const body = await bodyOf(req);
+  if (!body || typeof body.message !== 'string' || !body.message.trim()) {
+    return json({ error: 'A non-empty error message is required.' }, 400);
+  }
+
+  await audit({
+    action: 'client.error',
+    actor: session.email,
+    target: 'app.global_error',
+    result: 'failure',
+    detail: {
+      message: body.message.slice(0, 500),
+      stack: typeof body.stack === 'string' ? body.stack.slice(0, 1000) : null,
+    },
+  });
+  return json({ ok: true }, 201);
 }

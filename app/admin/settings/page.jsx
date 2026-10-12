@@ -2,6 +2,7 @@
 
 import { APPS } from '../../../lib/apps';
 import { PageHeader, Panel, StatusBadge, SourceBadge, fmtDateTime, asText } from '../../../components/ui';
+import PremiumVipPanel from '../../../components/PremiumVipPanel';
 import { useEffect, useState } from 'react';
 import { useSession } from '../../../components/SessionProvider';
 
@@ -117,6 +118,9 @@ export default function Settings() {
             </ul>
           </Panel>
         </div>
+      </div>
+      <div className="mt-3">
+        <PremiumVipPanel />
       </div>
     </>
   );
