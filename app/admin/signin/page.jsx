@@ -29,7 +29,7 @@ function SignInForm() {
   }
   return <main className="pb-auth-page" style={{minHeight:'100vh',display:'grid',placeItems:'center',padding:24}}>
     <section style={{maxWidth:780,width:'100%',background:'linear-gradient(145deg,#12213a,#091329 80%)',padding:'clamp(24px,5vw,48px)',border:'1px solid rgba(132,174,239,.23)',borderRadius:28,color:'#fff',boxShadow:'0 35px 110px #000a, inset 0 1px rgba(255,255,255,.08)'}}>
-      <div style={{textAlign:'center',marginBottom:26}}><Link href="/" style={{color:'#e6eefb',fontWeight:800,textDecoration:'none'}}>PLAYBEAT DIGITAL</Link><h1 style={{fontSize:26,marginTop:16}}>Select your profile</h1><p style={{color:'#9db3d4'}}>Executive access · PIN only</p></div>
+      <div style={{textAlign:'center',marginBottom:26}}><Link href="/" style={{color:'#e6eefb',fontWeight:800,textDecoration:'none'}}>PLAYBEAT DIGITAL</Link><div className="pb-exec-brand-orbit"><img src="/playbeat-orbit-logo.jpg" alt="PlayBeat Digital logo"/><span aria-hidden="true"/></div><h1 style={{fontSize:26,marginTop:16}}>Select your profile</h1><p style={{color:'#9db3d4'}}>Executive access · PIN only</p></div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(3,minmax(0,1fr))',gap:16,marginBottom:30}}>
         {profiles.map(p=><button key={p.id} type="button" onClick={()=>{setProfile(p.id);setPin('');setError('')}} aria-pressed={profile===p.id}
           style={{border:profile===p.id?'2px solid #66c4ff':'1px solid #304a7b',borderRadius:16,background:profile===p.id?'#153a72':'#101e3b',padding:'18px 5px',color:'#fff',cursor:'pointer'}}>
