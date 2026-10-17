@@ -36,7 +36,7 @@ export async function POST(req) {
     const profiles = { qazi: 'QAZI', creed: 'CREED', mahbuba: 'MAHBUBA' };
     const suffix = profiles[execId];
     const pin = String(body.pin || '');
-    if (!suffix || !/^\\d{5}$/.test(pin)) return NextResponse.json({ error: 'Invalid PIN.' }, { status: 401 });
+    if (!suffix || !/^\d{5}$/.test(pin)) return NextResponse.json({ error: 'Invalid PIN.' }, { status: 401 });
     const execEmail = 'executive-' + execId + '@playbeatarena.asia';
     const execPin = process.env['EXEC_PIN_' + suffix];
     const gateExec = await loginAllowed('ip:' + ip, 'exec:' + execId);
