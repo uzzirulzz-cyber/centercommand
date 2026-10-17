@@ -1,9 +1,38 @@
 'use client';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useSession } from '../../../components/SessionProvider';
 import ModuleWorkspace from '../../../components/ModuleWorkspace';
 
 // Central admin route: uses existing authenticated record endpoints and their
 // RBAC checks. No browser-side provider credentials or invented metrics.
+function AdsterraAnalytics(){
+ const {api,can}=useSession();
+ const [data,setData]=useState(null);
+ const [error,setError]=useState('');
+ const [days,setDays]=useState('30');
+ useEffect(()=>{if(!can('analytics:view'))return;let active=true;
+  const to=new Date(),from=new Date(to.getTime()-(Number(days)-1)*86400000);
+  api('/api/admin/adsterra?from='+from.toISOString().slice(0,10)+'&to='+to.toISOString().slice(0,10))
+   .then(r=>{if(active){if(r?.ok)setData(r);else setError(r?.error||'Unable to load Adsterra stats');}})
+   .catch(()=>{if(active)setError('Unable to load Adsterra statistics')});
+  return()=>{active=false};
+ },[api,can,days]);
+ if(!can('analytics:view'))return <div className="alert alert-warning">Analytics permission required.</div>;
+ const money=v=>v==null?'Not available':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(v);
+ const count=v=>v==null?'Not available':Number(v).toLocaleString();
+ return <section className="card border-0 shadow-sm mb-4" aria-label="Adsterra advertising revenue">
+  <div className="card-body">
+   <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3"><div><h2 className="h5 mb-1">Adsterra · Viewership vs Earnings</h2><p className="small text-secondary mb-0">Publisher-reported ad impressions and earnings, separately by website. Ad impressions are not unique viewers.</p></div>
+   <select className="form-select form-select-sm" style={{maxWidth:155}} aria-label="Analytics date range" value={days} onChange={e=>setDays(e.target.value)}><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></div>
+   {error&&<div className="alert alert-warning">{error}</div>}
+   {!data&&!error&&<p className="text-secondary">Loading publisher statistics…</p>}
+   {data&&<><div className="table-responsive"><table className="table table-hover align-middle"><thead><tr><th>Website</th><th>Status</th><th>Ad impressions</th><th>Clicks</th><th>CTR</th><th>Ad revenue (USD)</th><th>Ad RPM</th></tr></thead><tbody>
+    {(data.sites||[]).map(row=><tr key={row.site}><th>{row.site}</th><td><span className={row.status==='connected'?'badge bg-success':'badge bg-secondary'}>{row.status}</span></td><td>{count(row.impressions)}</td><td>{count(row.clicks)}</td><td>{row.ctr==null?'—':row.ctr.toFixed(2)+'%'}</td><td>{money(row.revenue)}</td><td>{money(row.rpm)}</td></tr>)}</tbody></table></div>
+    {(data.sites||[]).filter(row=>row.reason).map(row=><p key={row.site} className="small text-secondary mb-1">{row.site}: {row.reason}</p>)}
+    <p className="small text-secondary mb-0">Ad RPM = reported ad revenue ÷ ad impressions × 1,000. Viewer-to-revenue RPM requires separately connected visitor analytics. Figures are unavailable until Adsterra credentials and domain IDs are configured.</p></>}
+  </div></section>;
+}
 export default function StreamingCommandCenter() {
   return <div className="container-fluid py-3">
     <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
@@ -28,6 +57,7 @@ export default function StreamingCommandCenter() {
         </div>)}
     </div>
     <div className="alert alert-info small" role="status"><strong>Connection policy:</strong> Records and controls below use the existing authenticated admin API. An unconfigured stream provider remains unavailable rather than displaying fictitious live-channel or audience data. Broadcasting controls require the connected application's API and the broadcast:control permission.</div>
+    <AdsterraAnalytics />
     <section className="mb-5" aria-label="PlayBeat Live IPTV management"><ModuleWorkspace module="live" /></section>
     <section aria-label="MAGXTV Sports management"><ModuleWorkspace module="magxtv" /></section>
   </div>;
