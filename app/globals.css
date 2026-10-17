@@ -1181,3 +1181,15 @@ a {
   .pb-rixzo-chart { height:160px; }
   .pb-rixzo-chart-caption { font-size:.59rem; }
 }
+
+/* PlayBeat Arena | premium deep Bootstrap executive edition */
+:root{--pb-radius:18px;--pb-content-gap:22px;--pb-sidebar-w:268px}
+[data-bs-theme='dark']{--bs-body-bg:#080e1c;--bs-emphasis-color:#edf4ff;--bs-secondary-color:#9aabc5;--bs-border-color:#263952;--bs-tertiary-bg:#122039;--pb-card-bg:#111e33;--pb-sidebar-bg:#0b172b;--pb-hover:#182b47;--pb-input-bg:#0c1830;--pb-topbar-bg:rgba(9,18,35,.94);--pb-line:#283b55;--pb-text:#edf4ff;--pb-muted:#a5b5cf;--pb-accent:#437ff0;--pb-highlight:#e9b75d}
+[data-bs-theme='dark'] body {background:radial-gradient(ellipse at 70% -15%,rgba(39,95,193,.14),transparent 42%),#080e1c}
+[class*="admin"] :is(.card,.modal-content,.dropdown-menu) {border-radius:16px;box-shadow:0 10px 32px rgba(2,9,21,.12)}
+[data-bs-theme='dark'] :is(.card,.modal-content,.dropdown-menu){border-color:rgba(135,172,225,.15);box-shadow:0 12px 36px rgba(0,0,0,.23),inset 0 1px rgba(255,255,255,.025)}
+:where(.btn,.form-control,.form-select){transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
+:where(.btn,.form-control,.form-select):focus-visible{outline:2px solid #80baff;outline-offset:2px}
+.btn-primary{background-image:linear-gradient(135deg,#3778e9,#2257bb);box-shadow:0 6px 20px rgba(40,101,208,.15)}
+.table>thead>tr>th{letter-spacing:.05em;font-size:.76rem;text-transform:uppercase;font-weight:700}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
