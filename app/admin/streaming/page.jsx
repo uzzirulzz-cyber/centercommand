@@ -56,6 +56,22 @@ export default function StreamingCommandCenter() {
           </div></div>
         </div>)}
     </div>
+    <section className="card shadow-sm border-warning-subtle mb-4" aria-label="MAGXTV infrastructure status">
+      <div className="card-body">
+        <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+          <h2 className="h5 mb-0"><i className="bi bi-broadcast me-2" />MAGXTV · Recovery & Playlist</h2>
+          <span className="badge text-bg-warning">Temporary recovery routing · Playback unverified</span>
+        </div>
+        <p className="small text-secondary mb-3">The domain currently uses the magxtv-recovery Worker in the new Cloudflare account to reach the previous Pages deployment. This is a routing configuration, not proof that the upstream IPTV playlist contains playable channels.</p>
+        <div className="d-flex flex-wrap gap-2">
+          <a href="https://magxtv.click" target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">Open MAGXTV ↗</a>
+          <a href="https://dash.cloudflare.com/20c83732a1af52f80655768cd4dfc251/workers-and-pages" target="_blank" rel="noopener noreferrer" className="btn btn-outline-secondary btn-sm">Cloudflare · New account ↗</a>
+          <a href="https://magxtv-proxy.uzzirulzz.workers.dev/api/live/streams" target="_blank" rel="noopener noreferrer" className="btn btn-outline-secondary btn-sm">Inspect provider catalog ↗</a>
+          <a href="https://github.com/uzzirulzz-cyber/llivesports/tree/magxtv/cloudflare-worker/magxtv" target="_blank" rel="noopener noreferrer" className="btn btn-outline-secondary btn-sm">Production source ↗</a>
+        </div>
+        <p className="small text-secondary mt-3 mb-0">If the playlist is empty, investigate the provider's /api/live/streams and /api/live/categories responses, token issuance, CORS and playback upstream. The old dated allowlist was removed; this admin does not claim channels are live unless verified.</p>
+      </div>
+    </section>
     <div className="alert alert-info small" role="status"><strong>Connection policy:</strong> Records and controls below use the existing authenticated admin API. An unconfigured stream provider remains unavailable rather than displaying fictitious live-channel or audience data. Broadcasting controls require the connected application's API and the broadcast:control permission.</div>
     <AdsterraAnalytics />
     <section className="mb-5" aria-label="PlayBeat Live IPTV management"><ModuleWorkspace module="live" /></section>
