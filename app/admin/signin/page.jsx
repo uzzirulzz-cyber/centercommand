@@ -14,7 +14,7 @@ function SignInForm() {
   const profiles = [{id:'qazi',name:'Qazi',title:'CEO'}, {id:'creed',name:'Creed',title:'Founder'}, {id:'mahbuba',name:'Mahbuba',title:'Director'}];
   async function submit(e) {
     e.preventDefault();setError('');
-    if (!profile || !/^\\d{5}$/.test(pin)) {setError('Select a profile and enter your five-digit PIN.');return}
+    if (!profile || !/^\d{5}$/.test(pin)) {setError('Select a profile and enter your five-digit PIN.');return}
     setLoading(true);
     try {
       const next=new URLSearchParams(window.location.search).get('next')||'/admin';
@@ -37,7 +37,7 @@ function SignInForm() {
       </div>
       {profile&&<form onSubmit={submit} style={{maxWidth:340,margin:'0 auto'}}>
         <label htmlFor="executive-pin" style={{display:'block',marginBottom:8}}>Enter {profiles.find(p=>p.id===profile)?.name}'s PIN</label>
-        <input id="executive-pin" type="password" inputMode="numeric" autoComplete="off" pattern="[0-9]{5}" maxLength={5} autoFocus required value={pin} onChange={e=>setPin(e.target.value.replace(/\\D/g,'').slice(0,5))}
+        <input id="executive-pin" type="password" inputMode="numeric" autoComplete="off" pattern="[0-9]{5}" maxLength={5} autoFocus required value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,'').slice(0,5))}
           placeholder="•••••" style={{background:'#0a1127',color:'#fff',border:'1px solid #4b6fa5',padding:15,borderRadius:12,width:'100%',textAlign:'center',fontSize:24,letterSpacing:8}}/>
         {error&&<p role="alert" style={{color:'#ff9f9f',marginTop:12}}>{error}</p>}
         <button disabled={loading||pin.length!==5} type="submit" className="btn btn-primary w-100" style={{marginTop:14,padding:12,borderRadius:12}}>{loading?'Verifying…':'Unlock dashboard'}</button>
