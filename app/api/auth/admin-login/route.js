@@ -1,6 +1,6 @@
 // POST /api/auth/admin-login  — README §8.3
 import { NextResponse } from 'next/server';
-import { findUserByEmail, createSession } from '../../../../lib/auth/store';
+import { findUserByEmail, upsertUser, createSession } from '../../../../lib/auth/store';
 import { verifyPassword, verifyTotp } from '../../../../lib/auth/credentials';
 import { setSessionCookie, CSRF_COOKIE } from '../../../../lib/auth/sessions';
 import { loginAllowed, recordLoginFailure, recordLoginSuccess, issueCsrfToken, csrfCookieOptions } from '../../../../lib/auth/guard';
@@ -37,16 +37,17 @@ export async function POST(req) {
     const suffix = profiles[execId];
     const pin = String(body.pin || '');
     if (!suffix || !/^\\d{5}$/.test(pin)) return NextResponse.json({ error: 'Invalid PIN.' }, { status: 401 });
-    const execEmail = process.env['EXEC_EMAIL_' + suffix];
+    const execEmail = 'executive-' + execId + '@playbeatarena.asia';
     const execPin = process.env['EXEC_PIN_' + suffix];
     const gateExec = await loginAllowed('ip:' + ip, 'exec:' + execId);
     if (!gateExec.allowed) return NextResponse.json({ error: 'Too many attempts.' }, { status: 429 });
-    if (!execEmail || !execPin || !safePinMatch(pin, execPin)) {
+    if (!execPin || !safePinMatch(pin, execPin)) {
       await recordLoginFailure('ip:' + ip, 'exec:' + execId);
       return NextResponse.json({ error: 'Invalid PIN or inactive profile.' }, { status: 401 });
     }
-    const execUser = await findUserByEmail(execEmail);
-    if (!execUser || execUser.disabled) return NextResponse.json({ error: 'Profile not configured.' }, { status: 403 });
+    let execUser = await findUserByEmail(execEmail);
+    if (!execUser) execUser = await upsertUser({ id:'executive-' + execId, email: execEmail, name: execId === 'qazi' ? 'Qazi' : execId === 'creed' ? 'Creed' : 'Mahbuba', role: 'admin', apps: ['*'], disabled: false, createdAt: new Date().toISOString() });
+    if (execUser.disabled) return NextResponse.json({ error: 'Profile disabled.' }, { status: 403 });
     const sid = await createSession({ id: execUser.id, email: execUser.email, role: execUser.role, apps: execUser.apps }, { ip, userAgent });
     setSessionCookie(sid);
     cookies().set(CSRF_COOKIE, issueCsrfToken(), csrfCookieOptions());
