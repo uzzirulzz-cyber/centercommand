@@ -7,6 +7,8 @@ import { loginAllowed, recordLoginFailure, recordLoginSuccess, issueCsrfToken, c
 import { audit } from '../../../../lib/audit';
 import { cookies } from 'next/headers';
 
+import crypto from 'node:crypto';
+function safePinMatch(a,b){const x=Buffer.from(a);const y=Buffer.from(b);return x.length===y.length&&crypto.timingSafeEqual(x,y)}
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +29,30 @@ export async function POST(req) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: 'invalid request' }, { status: 400 });
+  }
+
+  const execId = String(body.profile || '').toLowerCase().trim();
+  if (execId) {
+    const profiles = { qazi: 'QAZI', creed: 'CREED', mahbuba: 'MAHBUBA' };
+    const suffix = profiles[execId];
+    const pin = String(body.pin || '');
+    if (!suffix || !/^\\d{5}$/.test(pin)) return NextResponse.json({ error: 'Invalid PIN.' }, { status: 401 });
+    const execEmail = process.env['EXEC_EMAIL_' + suffix];
+    const execPin = process.env['EXEC_PIN_' + suffix];
+    const gateExec = await loginAllowed('ip:' + ip, 'exec:' + execId);
+    if (!gateExec.allowed) return NextResponse.json({ error: 'Too many attempts.' }, { status: 429 });
+    if (!execEmail || !execPin || !safePinMatch(pin, execPin)) {
+      await recordLoginFailure('ip:' + ip, 'exec:' + execId);
+      return NextResponse.json({ error: 'Invalid PIN or inactive profile.' }, { status: 401 });
+    }
+    const execUser = await findUserByEmail(execEmail);
+    if (!execUser || execUser.disabled) return NextResponse.json({ error: 'Profile not configured.' }, { status: 403 });
+    const sid = await createSession({ id: execUser.id, email: execUser.email, role: execUser.role, apps: execUser.apps }, { ip, userAgent });
+    setSessionCookie(sid);
+    cookies().set(CSRF_COOKIE, issueCsrfToken(), csrfCookieOptions());
+    await recordLoginSuccess('ip:' + ip, 'exec:' + execId);
+    await audit({ action: 'auth.signin', actor: execUser.email, role: execUser.role, ip, userAgent, result: 'success' });
+    return NextResponse.json({ ok: true, redirect: safeNext(body.next), user: { email: execUser.email, role: execUser.role, apps: execUser.apps } });
   }
 
   const email = String(body.email || '').trim().toLowerCase();
