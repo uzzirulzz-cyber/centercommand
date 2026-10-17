@@ -1193,3 +1193,10 @@ a {
 .btn-primary{background-image:linear-gradient(135deg,#3778e9,#2257bb);box-shadow:0 6px 20px rgba(40,101,208,.15)}
 .table>thead>tr>th{letter-spacing:.05em;font-size:.76rem;text-transform:uppercase;font-weight:700}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Premium animated executive login brand crest */
+.pb-exec-brand-orbit {width:112px;height:112px;margin:14px auto 10px;position:relative;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,rgba(78,153,255,.14),transparent 72%)}
+.pb-exec-brand-orbit img{height:100px;width:100px;object-fit:contain;position:relative;z-index:1;filter:drop-shadow(0 0 16px rgba(109,191,255,.20))}
+.pb-exec-brand-orbit span{position:absolute;inset:2px;border-radius:50%;border:2px solid transparent;border-top-color:#e8b34e;border-right-color:#6399ee;animation:pbBrandSpin 6s linear infinite;box-shadow:0 0 18px rgba(91,154,243,.15)}
+@keyframes pbBrandSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.pb-exec-brand-orbit span{animation:none}}
