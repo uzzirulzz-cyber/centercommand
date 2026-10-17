@@ -7,138 +7,44 @@ import { Suspense } from 'react';
 
 function SignInForm() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [totp, setTotp] = useState('');
-  const [mfaRequired, setMfaRequired] = useState(false);
+  const [profile, setProfile] = useState('');
+  const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setError('');
+  const profiles = [{id:'qazi',name:'Qazi',title:'CEO'}, {id:'creed',name:'Creed',title:'Founder'}, {id:'mahbuba',name:'Mahbuba',title:'Director'}];
+  async function submit(e) {
+    e.preventDefault();setError('');
+    if (!profile || !/^\\d{5}$/.test(pin)) {setError('Select a profile and enter your five-digit PIN.');return}
     setLoading(true);
-
-    const next = new URLSearchParams(window.location.search).get('next') || '/admin';
-
     try {
-      const res = await fetch('/api/auth/admin-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, totp, next }),
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        if (data.mfaRequired) setMfaRequired(true);
-        setError(data.error || 'Sign-in failed.');
-        return;
-      }
-      // The session is an httpOnly cookie now — nothing to store client-side.
-      router.replace(data.redirect || '/admin');
-      router.refresh();
-    } catch {
-      setError('Network error — could not reach the server.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <main className="pb-auth-page">
-      <div className="pb-auth-grid" aria-hidden="true" />
-      <div className="pb-auth-frame">
-        <section className="pb-auth-story" aria-label="PlayBeat Digital">
-          <Link href="/" className="pb-auth-brand" aria-label="PlayBeat Digital home">
-            <span className="pb-brand-mark"><span aria-hidden="true">▶</span></span>
-            <span className="pb-auth-brand-word">PLAYBEAT <span>DIGITAL</span></span>
-          </Link>
-
-          <div className="pb-auth-story-copy">
-            <span className="pb-auth-eyebrow pb-auth-story-eyebrow"><span aria-hidden="true">✦</span> ADMIN PANEL · AUTHORIZED PERSONNEL ONLY</span>
-            <h2>Powering your <em>digital business</em> ecosystem</h2>
-            <p>Sign in to manage analytics, security, systems and operations from a single control center.</p>
-          </div>
-
-          <div className="pb-auth-capabilities" aria-label="Admin panel capabilities">
-            <span><i aria-hidden="true">↗</i> Analytics</span>
-            <span><i aria-hidden="true">⌑</i> Security</span>
-            <span><i aria-hidden="true">▤</i> Systems</span>
-            <span><i aria-hidden="true">⚙</i> Management</span>
-          </div>
-
-          <div className="pb-auth-story-footer">
-            <span>PLAYBEAT DIGITAL</span>
-            <span>SECURE ADMIN ACCESS</span>
-          </div>
-        </section>
-
-        <section className="pb-auth-panel" aria-labelledby="signin-title">
-          <div className="pb-auth-form-wrap">
-            <div className="pb-auth-mobile-brand">
-              <span className="pb-brand-mark"><span aria-hidden="true">▶</span></span>
-              <span className="pb-auth-brand-word">PLAYBEAT <span>DIGITAL</span></span>
-            </div>
-            <div className="pb-auth-heading">
-              <h1 id="signin-title">Sign in</h1>
-              <p>Access your PlayBeat Digital admin panel</p>
-            </div>
-
-            {error && <div className="alert alert-danger py-2" role="alert" aria-live="polite">{error}</div>}
-
-            <form onSubmit={submit} className="pb-auth-form">
-              <div className="mb-3">
-                <label className="form-label" htmlFor="email">Admin email</label>
-                <div className="pb-auth-input-wrap">
-                  <span className="pb-auth-input-icon" aria-hidden="true">◎</span>
-                  <input id="email" type="email" className="form-control" required autoComplete="username"
-                    value={email} onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@playbeat.digital" />
-                </div>
-              </div>
-              <div className="mb-3">
-                <label className="form-label" htmlFor="pw">Password</label>
-                <div className="pb-auth-input-wrap">
-                  <span className="pb-auth-input-icon" aria-hidden="true">▣</span>
-                  <input id="pw" type={showPassword ? 'text' : 'password'} className="form-control" required autoComplete="current-password"
-                    value={password} onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password" />
-                  <button type="button" className="pb-auth-password-toggle" onClick={() => setShowPassword((visible) => !visible)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword}>
-                    {showPassword ? 'Hide' : 'Show'}
-                  </button>
-                </div>
-              </div>
-
-              {mfaRequired && (
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="totp">Authenticator code</label>
-                  <input id="totp" className="form-control pb-mono" inputMode="numeric" maxLength={6}
-                    autoComplete="one-time-code" value={totp}
-                    onChange={(e) => setTotp(e.target.value.replace(/\D/g, ''))}
-                    placeholder="6-digit code" />
-                </div>
-              )}
-
-              <button className="btn btn-primary w-100 pb-auth-submit" disabled={loading}>
-                {loading ? 'Signing in…' : mfaRequired ? 'Verify code' : <> <span aria-hidden="true">→</span> Sign in</>}
-              </button>
-            </form>
-
-            <div className="pb-auth-security">
-              <span className="pb-auth-lock" aria-hidden="true">▣</span>
-              <p><strong>Secure Access</strong><br />Encrypted connection · Administrator access only</p>
-            </div>
-          </div>
-          <footer className="pb-auth-panel-footer">
-            <span>© {new Date().getFullYear()} PLAYBEAT DIGITAL</span>
-            <span>All rights reserved</span>
-          </footer>
-        </section>
+      const next=new URLSearchParams(window.location.search).get('next')||'/admin';
+      const res=await fetch('/api/auth/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({profile,pin,next})});
+      const data=await res.json().catch(()=>({}));setPin('');
+      if(!res.ok) {setError(data.error||'Access denied.');return}
+      router.replace(data.redirect||'/admin');router.refresh();
+    }catch {setPin('');setError('Cannot connect to the server.')}
+    finally {setLoading(false)}
+  }
+  return <main className="pb-auth-page" style={{minHeight:'100vh',display:'grid',placeItems:'center',padding:24}}>
+    <section style={{maxWidth:650,width:'100%',background:'#0b1530',padding:32,border:'1px solid #38558c',borderRadius:24,color:'#fff',boxShadow:'0 25px 90px #0008'}}>
+      <div style={{textAlign:'center',marginBottom:26}}><Link href="/" style={{color:'#e6eefb',fontWeight:800,textDecoration:'none'}}>PLAYBEAT DIGITAL</Link><h1 style={{fontSize:26,marginTop:16}}>Select your profile</h1><p style={{color:'#9db3d4'}}>Executive access · PIN only</p></div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,minmax(0,1fr))',gap:12,marginBottom:26}}>
+        {profiles.map(p=><button key={p.id} type="button" onClick={()=>{setProfile(p.id);setPin('');setError('')}} aria-pressed={profile===p.id}
+          style={{border:profile===p.id?'2px solid #66c4ff':'1px solid #304a7b',borderRadius:16,background:profile===p.id?'#153a72':'#101e3b',padding:'18px 5px',color:'#fff',cursor:'pointer'}}>
+          <img src={'/executives/'+p.id+'.jpg'} alt={p.name} onError={e=>{e.currentTarget.style.visibility='hidden'}} style={{display:'block',margin:'0 auto 10px',width:72,height:72,objectFit:'cover',borderRadius:'50%',background:'#243b66'}}/>
+          <strong style={{display:'block'}}>{p.name}</strong><small style={{color:'#aabbd9'}}>{p.title}</small>
+        </button>)}
       </div>
-    </main>
-  );
+      {profile&&<form onSubmit={submit} style={{maxWidth:340,margin:'0 auto'}}>
+        <label htmlFor="executive-pin" style={{display:'block',marginBottom:8}}>Enter {profiles.find(p=>p.id===profile)?.name}'s PIN</label>
+        <input id="executive-pin" type="password" inputMode="numeric" autoComplete="off" pattern="[0-9]{5}" maxLength={5} autoFocus required value={pin} onChange={e=>setPin(e.target.value.replace(/\\D/g,'').slice(0,5))}
+          placeholder="•••••" style={{background:'#0a1127',color:'#fff',border:'1px solid #4b6fa5',padding:15,borderRadius:12,width:'100%',textAlign:'center',fontSize:24,letterSpacing:8}}/>
+        {error&&<p role="alert" style={{color:'#ff9f9f',marginTop:12}}>{error}</p>}
+        <button disabled={loading||pin.length!==5} type="submit" className="btn btn-primary w-100" style={{marginTop:14,padding:12,borderRadius:12}}>{loading?'Verifying…':'Unlock dashboard'}</button>
+      </form>}
+      {!profile&&error&&<p role="alert" style={{color:'#ff9f9f',textAlign:'center'}}>{error}</p>}
+    </section>
+  </main>;
 }
 
 export default function AdminSignIn() {
